@@ -1,0 +1,30 @@
+---
+# Source: consul/templates/sync-catalog-clusterrole.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul-oc-consul-sync-catalog
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+rules:
+  - apiGroups: [""]
+    resources:
+      - services
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+      - create
+  - apiGroups: [""]
+    resources:
+      - nodes
+    verbs:
+      - get

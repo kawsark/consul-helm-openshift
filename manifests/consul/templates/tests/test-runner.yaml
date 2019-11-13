@@ -1,0 +1,34 @@
+---
+# Source: consul/templates/tests/test-runner.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "consul-oc-consul-test"
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: consul-test
+      image: "hashicorp/consul-enterprise:1.6.1-ent"
+      env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+      command:
+        - "/bin/sh"
+        - "-ec"
+        - |
+            export VALUE="consul-oc"
+            export CONSUL_HTTP_ADDR="${HOST_IP}:8500"
+            consul kv delete _consul_helm_test
+            consul kv put _consul_helm_test $VALUE
+            [ `consul kv get _consul_helm_test` = "$VALUE" ]
+            consul kv delete _consul_helm_test
+  restartPolicy: Never

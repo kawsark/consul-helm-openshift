@@ -1,0 +1,25 @@
+---
+# Source: consul/templates/server-config-configmap.yaml
+# StatefulSet to run the actual Consul server cluster.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-oc-consul-server-config
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+data:
+  extra-from-values.json: |-
+    {
+      "primary_datacenter": "oc-us-east-1",
+      "log_level":"INFO",
+      "encrypt":"YZqGRaEajsh8M1w4e1z/Jg=="
+    }
+    
+  central-config.json: |-
+    {
+      "enable_central_service_config": true
+    }

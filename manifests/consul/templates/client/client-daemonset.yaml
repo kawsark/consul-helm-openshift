@@ -1,0 +1,122 @@
+---
+# Source: consul/templates/client-daemonset.yaml
+# DaemonSet to run the Consul clients on every node.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: consul-oc-consul
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+spec:
+  selector:
+    matchLabels:
+      app: consul
+      chart: consul-helm
+      release: consul-oc
+      component: client
+      hasDNS: "true"
+  template:
+    metadata:
+      labels:
+        app: consul
+        chart: consul-helm
+        release: consul-oc
+        component: client
+        hasDNS: "true"
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: consul-oc-consul-client
+
+      # Consul agents require a directory for data, even clients. The data
+      # is okay to be wiped though if the Pod is removed, so just use an
+      # emptyDir volume.
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: consul-oc-consul-client-config
+
+      containers:
+        - name: consul
+          image: "hashicorp/consul-enterprise:1.6.1-ent"
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODE
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            
+          command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              CONSUL_FULLNAME="consul-oc-consul"
+
+              exec /bin/consul agent \
+                -node="${NODE}" \
+                -advertise="${POD_IP}" \
+                -bind=0.0.0.0 \
+                -client=0.0.0.0 \
+                -hcl="ports { grpc = 8502 }" \
+                -config-dir=/consul/config \
+                -datacenter=oc-us-east-1 \
+                -data-dir=/consul/data \
+                -retry-join=${CONSUL_FULLNAME}-server-0.${CONSUL_FULLNAME}-server.${NAMESPACE}.svc \
+                -retry-join=${CONSUL_FULLNAME}-server-1.${CONSUL_FULLNAME}-server.${NAMESPACE}.svc \
+                -retry-join=${CONSUL_FULLNAME}-server-2.${CONSUL_FULLNAME}-server.${NAMESPACE}.svc \
+                -domain=consul
+          volumeMounts:
+            - name: data
+              mountPath: /consul/data
+            - name: config
+              mountPath: /consul/config
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - consul leave
+          ports:
+            - containerPort: 8500
+              hostPort: 8500
+              name: http
+            - containerPort: 8502
+              hostPort: 8502
+              name: grpc
+            - containerPort: 8301
+              name: serflan
+            - containerPort: 8302
+              name: serfwan
+            - containerPort: 8300
+              name: server
+            - containerPort: 8600
+              name: dns-tcp
+              protocol: "TCP"
+            - containerPort: 8600
+              name: dns-udp
+              protocol: "UDP"
+          readinessProbe:
+            # NOTE(mitchellh): when our HTTP status endpoints support the
+            # proper status codes, we should switch to that. This is temporary.
+            exec:
+              command:
+                - "/bin/sh"
+                - "-ec"
+                - |
+                  curl http://127.0.0.1:8500/v1/status/leader 2>/dev/null | \
+                  grep -E '".+"'

@@ -1,0 +1,78 @@
+---
+# Source: consul/templates/sync-catalog-deployment.yaml
+# The deployment for running the sync-catalog pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul-oc-consul-sync-catalog
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consul
+      chart: consul-helm
+      release: consul-oc
+      component: sync-catalog
+  template:
+    metadata:
+      labels:
+        app: consul
+        chart: consul-helm
+        release: consul-oc
+        component: sync-catalog
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      serviceAccountName: consul-oc-consul-sync-catalog
+      containers:
+        - name: consul-sync-catalog
+          image: "hashicorp/consul-k8s:0.9.3"
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              consul-k8s sync-catalog \
+                -http-addr=${HOST_IP}:8500 \
+                -k8s-default-sync=true \
+                -consul-domain=consul \
+                -k8s-service-prefix="consul-oc" \
+                -k8s-write-namespace=${NAMESPACE} \
+                -node-port-sync-type=ExternalFirst \
+                -log-level=info \
+                -consul-k8s-tag=oc \
+                -consul-service-prefix="oc-" \
+          livenessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
