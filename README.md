@@ -3,7 +3,8 @@ An experimental repo with steps to deploy consul-helm on OpenShift
 
 All the files and steps in this repo are example only
 
-## Generate consul-helm templates
+## Generate consul-helm templates (Optional)
+This repo already includes consul-helm generated files
 ```
 git clone https://github.com/hashicorp/consul-helm.git
 cd consul-helm
@@ -41,16 +42,19 @@ oc adm policy add-scc-to-user consul-client -z consul-oc-consul-client
 cd .. && oc apply -f client/
 ```
 
-## Check consul deployment
+## Apply Connect inject, sync catalog, UI and DNS service
 ```
-oc exec -it consul-oc-consul-server-0 -- consul members
-```
-
-## Deploy DNS and UI services
-```
+oc apply -f sync-catalog/
+oc apply -f connect-inject/
 oc apply -f dns-service.yaml
 oc apply -f ui-service.yaml
+
+# Check consul deployment
+oc exec -it consul-oc-consul-server-0 -- consul members
+
+# Apply license
+oc exec -it consul-oc-consul-server-0 -- consul license put <license>
 ```
 
 ## Deploy example application
-Pending
+git clone https://github.com/chuysmans/intro-to-consul-connect-with-kubernetes.git
