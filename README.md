@@ -5,13 +5,9 @@ Note: this deployment is for testing purposes and may not be suitable for produc
 
 Steps:
 1. Adjust Kubeconfig to ensure `oc` or `kubectl` tools work with your OpenShift cluster
-2. Generate Kubernetes YAML templates using helm client side tooling
-3. (Option A) Deploy Consul using a script
-3. (Option B) Or, Deploy Consul manually:
-  - Deploy Consul server agents
-  - Deploy Consul client agents
-  - Apply Connect inject, sync catalog, UI and DNS service
-4. Deploy example application
+1. Generate Kubernetes YAML templates using helm client side tooling
+1. Deploy Consul using a script (Option A), or manually (Option B)
+1. Deploy example application
 
 ## 1. Adjust Kubeconfig
 The steps in this repository requires either the OpenShift CLI tool `oc`, or the Kubernetes `kubectl` tool. The CLI tool should be configured to interact with the target OpenShift cluster. Depending on your security setup you may need to run these steps from a bastion server. 
