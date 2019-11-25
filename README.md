@@ -4,16 +4,16 @@ This repository provides a set of steps to deploy consul-helm on OpenShift using
 Note: this deployment is for testing purposes and may not be suitable for production. Please review each .yaml file carefully against existing security policies before applying them to your Kubernetes (OpenShift) cluster.
 
 Steps:
-- Adjust Kubeconfig to ensure `oc` or `kubectl` tools work with your OpenShift cluster
-- Generate Kubernetes YAML templates using helm client side tooling
-- Deploy Consul using a script
-- Or, Deploy Consul manually:
+1. Adjust Kubeconfig to ensure `oc` or `kubectl` tools work with your OpenShift cluster
+2. Generate Kubernetes YAML templates using helm client side tooling
+3. (Option A) Deploy Consul using a script
+3. (Option B) Or, Deploy Consul manually:
   - Deploy Consul server agents
   - Deploy Consul client agents
   - Apply Connect inject, sync catalog, UI and DNS service
-- Deploy example application
+4. Deploy example application
 
-## Adjust Kubeconfig
+## 1. Adjust Kubeconfig
 The steps in this repository requires either the OpenShift CLI tool `oc`, or the Kubernetes `kubectl` tool. The CLI tool should be configured to interact with the target OpenShift cluster. Depending on your security setup you may need to run these steps from a bastion server. 
 ```
 export KUBECONFIG=/path/to/kubeconfig:$KUBECONFIG
@@ -24,7 +24,7 @@ oc get pods #or kubectl get pods
 ```
 - Note: If you used RedHat's installer to install OpenShift 4.2, then you will have an directory `<installer-dir>/auth/` that will contain the kubeconfig file. 
 
-## Generate consul-helm templates (Optional)
+## 2. Generate consul-helm templates (Optional)
 This repo already includes example consul-helm generated files. However you can use the steps below to generate the YAML templates. Please adjust the example [oc.values.yaml](oc.values.yaml) file before running `helm template` command.
 ```
 git clone https://github.com/hashicorp/consul-helm.git
@@ -35,7 +35,7 @@ helm template --name consul-oc --output-dir ./manifests -f oc.values.yaml .
 
 **Important**: Please review and adjust the generated .yaml files as needed.
 
-## Deploy Consul using a script
+## 3 (Option A) Deploy Consul using a script
 A bash script `consul-oc.sh` is included here which uses `oc` or `kubectl` CLI tool to apply the generated templates. 
 - Note: this script will only work if Persistent Volumes are available. If not, please use the manual steps below.
 - If you generated your own YAML template, please adjust the `manifests_dir` below.
@@ -52,7 +52,7 @@ license_file=license.hclic #Set path to license file if using consul-enterprise 
 ```
 - Skip to: Deploy an example application
 
-## Deploy Consul manually
+## 3 (Option B) Deploy Consul manually
 If you prefer, you may run `oc apply` or `kubectl apply` commands manually as below. 
 
 ### Organize generated templates into directories
@@ -111,7 +111,7 @@ oc exec -it consul-oc-consul-server-0 -- consul members
 oc exec -it consul-oc-consul-server-0 -- consul license put <license>
 ```
 
-## Deploy an example application
+## 4. Deploy an example application
 We will deploy an example application with two services: Dashboard and Counting. The Dashboard service calls the counting service which returns the quantity of times it has been invoked.
 
 From the root of the repository, please run the commands below. You can substitute `kubectl` for `oc` if needed.
