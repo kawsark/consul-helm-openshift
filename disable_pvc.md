@@ -1,4 +1,5 @@
-Disabling the PersistentVolumeClaim in Consul server StatefulSet. An example with the changes below are shown in this file: [server-statefulset-nopvc.yaml](server-statefulset-nopvc.yaml).
+## Disabling the PersistentVolumeClaim in Consul server StatefulSet
+An example with the changes below are shown in this file: [server-statefulset-nopvc.yaml](server-statefulset-nopvc.yaml).
 
 1. In the generated `server-statefulset.yaml` file, add a new Data volume under volumes.
 ```

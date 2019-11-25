@@ -49,7 +49,12 @@ license_file=license.hclic #Set path to license file if using consul-enterprise 
 - Skip to: Deploy an example application
 
 ## 3 (Option B) Deploy Consul manually
-If you prefer, you may run `oc apply` or `kubectl apply` commands manually as below. 
+If you prefer, you may run `oc apply` or `kubectl apply` commands manually as below. Below are the associated steps:
+- Organize generated templates into directories
+- Check if PersistentVolumes are supported
+- Deploy Consul server agents
+- Deploy Consul client agents
+- Deploy Connect inject, sync catalog, UI and DNS service
 
 ### Organize generated templates into directories
 ```
@@ -61,13 +66,14 @@ mkdir -p connect-inject && mv connect-inject-* connect-inject
 mkdir -p sync-catalog && mv sync-catalog-* sync-catalog
 ```
 
-### Deploy Consul server agents
+### Check if PersistentVolumes are supported
 Check if your installation supports Persistent Volumes. To do this, please run the `kubectl get sc` command and see if there is a default storage class defined as shown below:
 ```
 kubectl get sc #or, oc get sc
 ```
-If you do **not** see an output showing a default StorageClass please use these steps first:[disable server Persistent Volumes](disable_pvc.md).
+If you do **not** see an output showing a default StorageClass please follow these steps first:[disable server Persistent Volumes](disable_pvc.md).
 
+### Deploy Consul server agents
 From the root of the repository, please run the commands below. You can substitute `kubectl` for `oc` if needed.
 ```
 cp security-contexts/consul-server-scc.yaml manifests/consul/templates/
