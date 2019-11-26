@@ -23,3 +23,17 @@ data:
     {
       "enable_central_service_config": true
     }
+  proxy-defaults-config.json: |-
+    {
+      "config_entries": {
+        "bootstrap": [
+          {
+            "kind": "proxy-defaults",
+            "name": "global",
+            "mesh_gateway": {
+              "mode": "local"
+            }
+          }
+        ]
+      }
+    }

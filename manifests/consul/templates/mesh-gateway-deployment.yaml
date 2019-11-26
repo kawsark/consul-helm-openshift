@@ -1,0 +1,116 @@
+---
+# Source: consul/templates/mesh-gateway-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul-oc-consul-mesh-gateway
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+    component: mesh-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: consul
+      chart: consul-helm
+      release: consul-oc
+      component: mesh-gateway
+  template:
+    metadata:
+      labels:
+        app: consul
+        chart: consul-helm
+        release: consul-oc
+        component: mesh-gateway
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: consul
+                  release: "consul-oc"
+                  component: mesh-gateway
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: consul-oc-consul-mesh-gateway
+      volumes:
+        - name: consul-bin
+          emptyDir: {}
+      initContainers:
+        # We use the Envoy image as our base image so we use an init container to
+        # copy the Consul binary to a shared directory that can be used when
+        # starting Envoy.
+        - name: copy-consul-bin
+          image: "consul:1.6.1"
+          command:
+          - cp
+          - /bin/consul
+          - /consul-bin/consul
+          volumeMounts:
+          - name: consul-bin
+            mountPath: /consul-bin
+      containers:
+        - name: mesh-gateway
+          image: "envoyproxy/envoy:v1.10.0"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          volumeMounts:
+          - name: consul-bin
+            mountPath: /consul-bin
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          command:
+            # /bin/sh -c is needed so we can use the pod-specific environment
+            # variables.
+            - "/bin/sh"
+            - "-ec"
+            - |
+              exec /consul-bin/consul connect envoy \
+                -mesh-gateway \
+                -register \
+                -address="${POD_IP}:443" \
+                -http-addr="${HOST_IP}:8500" \
+                -grpc-addr="${HOST_IP}:8502" \
+                -wan-address="${HOST_IP}:443" \
+          livenessProbe:
+            tcpSocket:
+              port: 443
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          ports:
+            - name: gateway
+              containerPort: 443
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-ec", "/consul-bin/consul services deregister -http-addr=\"${HOST_IP}:8500\" -id=\"mesh-gateway\""]

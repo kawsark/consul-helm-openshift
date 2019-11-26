@@ -46,7 +46,7 @@ spec:
 
               consul-k8s inject-connect \
                 -default-inject=false \
-                -consul-image="hashicorp/consul-enterprise:1.6.1-ent" \
+                -consul-image="consul:1.6.1" \
                 -listen=:8080 \
                 -enable-central-config=true \
                 -tls-auto=${CONSUL_FULLNAME}-connect-injector-cfg \

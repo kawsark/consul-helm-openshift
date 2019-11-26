@@ -452,7 +452,7 @@ meshGateway:
   # gateways and Consul Connect will be configured to use gateways.
   # See https://www.consul.io/docs/connect/mesh_gateway.html
   # Requirements: consul >= 1.6.0 and consul-k8s >= 0.9.0 if using global.bootstrapACLs.
-  enabled: false
+  enabled: true
 
   # Globally configure which mode the gateway should run in.
   # Can be set to either "remote", "local", "none" or empty string or null.

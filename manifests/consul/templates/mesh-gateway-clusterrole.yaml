@@ -1,0 +1,14 @@
+---
+# Source: consul/templates/mesh-gateway-clusterrole.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul-oc-consul-mesh-gateway
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Tiller
+    release: consul-oc
+    component: mesh-gateway
+rules: []

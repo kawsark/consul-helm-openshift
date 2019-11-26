@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # setup environment
-manifests_dir=$(pwd)/manifests/consul/templates #Adjust this to where YAML templates are
+manifests_dir=$(pwd)/manifests/consul/templates
+# If you generated manifest files, please adjust this path appropriately
+#manifests_dir=$(pwd)/consul-helm/manifests/consul/templates
 cli=oc #Set this to oc or kubectl
 license_file=license.hclic #Set path to license file if using consul-enterprise image
 
@@ -13,7 +15,7 @@ mkdir -p client && mv client-* client
 mkdir -p mesh-gateway && mv mesh-gateway-* mesh-gateway
 mkdir -p connect-inject && mv connect-inject-* connect-inject
 mkdir -p sync-catalog && mv sync-catalog-* sync-catalog
-popd -
+popd
 
 # Server
 echo "Creating server objects"
@@ -48,7 +50,8 @@ popd
 ### Check deployment and apply license
 $cli exec -it consul-oc-consul-server-0 -- consul members
 
-echo "Waiting 10 seconds"
+echo "Waiting 90 seconds before applying license"
+sleep 90
 
 # Apply license (if you used an enterprise image)
 $cli exec -it consul-oc-consul-server-0 -- consul license put $(cat license_file)

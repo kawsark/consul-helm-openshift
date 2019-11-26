@@ -8,6 +8,7 @@ Steps:
 1. Generate Kubernetes YAML templates using helm client side tooling
 1. Deploy Consul using a script (Option A), or manually (Option B)
 1. Deploy example application
+1. Cleanup
 
 ## 1. Adjust Kubeconfig
 The steps in this repository requires either the OpenShift CLI tool `oc`, or the Kubernetes `kubectl` tool. The CLI tool should be configured to interact with the target OpenShift cluster. Depending on your security setup you may need to run these steps from a bastion server. 
@@ -24,18 +25,18 @@ oc get pods #or kubectl get pods
 This repo already includes example consul-helm generated files. However you can use the steps below to generate the YAML templates. Please adjust the example [oc.values.yaml](oc.values.yaml) file before running `helm template` command.
 ```
 git clone https://github.com/hashicorp/consul-helm.git
-cd consul-helm
-mkdir -p ./manifests
-helm template --name consul-oc --output-dir ./manifests -f oc.values.yaml .
+mkdir -p consul-helm/manifests
+helm template --name consul-oc --output-dir consul-helm/manifests -f oc.values.yaml consul-helm
 ```
-
 **Important**: Please review and adjust the generated .yaml files as needed.
 
 ## 3 (Option A) Deploy Consul using a script
-A bash script `consul-oc.sh` is included here which uses `oc` or `kubectl` CLI tool to apply the generated templates. 
+A bash script `consul-oc.sh` is included here which uses `oc` or `kubectl` CLI tool to apply the generated templates. By default it provisions consul OSS v1.6.1.
 - Note: this script will only work if Persistent Volumes are available. If not, please use the manual steps below.
-- If you generated your own YAML template, please adjust the `manifests_dir` below.
-- Adjust variables at the top of the script if needed
+- Adjust variables at the top of the script if needed:
+  - manifests_dir: if you generated your own YAML template, please adjust the `manifests_dir` below to: `manifests_dir=$(pwd)/consul-helm/manifests/consul/templates`
+  - cli: you can choose `oc` or `kubectl`
+  - license_file: If you modified `oc.values.yaml` to use a Consul Enterprise image, then please update the value with license file path.
 ```
 # setup environment
 manifests_dir=$(pwd)/manifests/consul/templates
@@ -44,6 +45,7 @@ license_file=license.hclic #Set path to license file if using consul-enterprise 
 ```
 - Run the script as below
 ```
+chmod +x ./consul-oc.sh
 ./consul-oc.sh
 ```
 - Skip to: Deploy an example application
@@ -69,7 +71,9 @@ mkdir -p sync-catalog && mv sync-catalog-* sync-catalog
 ### Check if PersistentVolumes are supported
 Check if your installation supports Persistent Volumes. To do this, please run the `kubectl get sc` command and see if there is a default storage class defined as shown below:
 ```
-kubectl get sc #or, oc get sc
+[core@ip-10-0-15-247 ~]$ oc get sc
+NAME            PROVISIONER             AGE
+gp2 (default)   kubernetes.io/aws-ebs   4d22h
 ```
 If you do **not** see an output showing a default StorageClass please follow these steps first:[disable server Persistent Volumes](disable_pvc.md).
 
@@ -108,8 +112,10 @@ oc apply -f ui-service.yaml
 
 # Check consul deployment
 oc exec -it consul-oc-consul-server-0 -- consul members
+```
 
-# Apply license (if you used an enterprise image)
+Once all the containers are showing a status of `Running`, please apply license as below:
+```
 oc exec -it consul-oc-consul-server-0 -- consul license put <license>
 ```
 
@@ -131,4 +137,11 @@ oc get nodes -o wide
 
 # Access the dashboard on your web-browser:
 http://<internal-or-external-ip>:<nodeport>/
+```
+
+## 5. Cleanup
+Please follow the steps in 1. Adjust Kubeconfig, then run the `cleanup.sh` script:
+```
+chmod +x cleanup.sh
+./cleanup.sh
 ```

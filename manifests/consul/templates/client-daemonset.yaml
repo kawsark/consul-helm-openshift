@@ -45,7 +45,7 @@ spec:
 
       containers:
         - name: consul
-          image: "hashicorp/consul-enterprise:1.6.1-ent"
+          image: "consul:1.6.1"
           env:
             - name: POD_IP
               valueFrom:
