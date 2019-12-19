@@ -11,6 +11,7 @@ metadata:
     chart: consul-helm
     heritage: Tiller
     release: consul-oc
+    component: server
 spec:
   serviceName: consul-oc-consul-server
   podManagementPolicy: Parallel
@@ -52,7 +53,7 @@ spec:
             name: consul-oc-consul-server-config
       containers:
         - name: consul
-          image: "consul:1.6.1"
+          image: "consul:1.6.2"
           env:
             - name: POD_IP
               valueFrom:

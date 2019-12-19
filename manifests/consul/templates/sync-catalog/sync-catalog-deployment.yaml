@@ -32,7 +32,7 @@ spec:
       serviceAccountName: consul-oc-consul-sync-catalog
       containers:
         - name: consul-sync-catalog
-          image: "hashicorp/consul-k8s:0.9.3"
+          image: "hashicorp/consul-k8s:0.10.1"
           env:
             - name: HOST_IP
               valueFrom:
@@ -56,6 +56,7 @@ spec:
                 -log-level=info \
                 -consul-k8s-tag=oc \
                 -consul-service-prefix="oc-" \
+                -add-k8s-namespace-suffix \
           livenessProbe:
             httpGet:
               path: /health/ready

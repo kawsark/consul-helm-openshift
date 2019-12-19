@@ -15,7 +15,7 @@ metadata:
 spec:
   containers:
     - name: consul-test
-      image: "consul:1.6.1"
+      image: "consul:1.6.2"
       env:
         - name: HOST_IP
           valueFrom:

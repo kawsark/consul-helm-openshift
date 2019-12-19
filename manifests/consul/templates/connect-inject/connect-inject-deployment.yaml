@@ -32,7 +32,7 @@ spec:
       serviceAccountName: consul-oc-consul-connect-injector-webhook-svc-account
       containers:
         - name: sidecar-injector
-          image: "hashicorp/consul-k8s:0.9.3"
+          image: "hashicorp/consul-k8s:0.10.1"
           env:
             - name: NAMESPACE
               valueFrom:
@@ -46,7 +46,8 @@ spec:
 
               consul-k8s inject-connect \
                 -default-inject=false \
-                -consul-image="consul:1.6.1" \
+                -consul-image="consul:1.6.2" \
+                -consul-k8s-image="hashicorp/consul-k8s:0.10.1" \
                 -listen=:8080 \
                 -enable-central-config=true \
                 -tls-auto=${CONSUL_FULLNAME}-connect-injector-cfg \

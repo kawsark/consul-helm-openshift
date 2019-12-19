@@ -33,9 +33,6 @@ spec:
       terminationGracePeriodSeconds: 10
       serviceAccountName: consul-oc-consul-client
 
-      # Consul agents require a directory for data, even clients. The data
-      # is okay to be wiped though if the Pod is removed, so just use an
-      # emptyDir volume.
       volumes:
         - name: data
           emptyDir: {}
@@ -45,9 +42,9 @@ spec:
 
       containers:
         - name: consul
-          image: "consul:1.6.1"
+          image: "consul:1.6.2"
           env:
-            - name: POD_IP
+            - name: ADVERTISE_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
@@ -68,7 +65,7 @@ spec:
 
               exec /bin/consul agent \
                 -node="${NODE}" \
-                -advertise="${POD_IP}" \
+                -advertise="${ADVERTISE_IP}" \
                 -bind=0.0.0.0 \
                 -client=0.0.0.0 \
                 -hcl="ports { grpc = 8502 }" \
@@ -99,7 +96,11 @@ spec:
               hostPort: 8502
               name: grpc
             - containerPort: 8301
-              name: serflan
+              protocol: "TCP"
+              name: serflan-tcp
+            - containerPort: 8301
+              protocol: "UDP"
+              name: serflan-udp
             - containerPort: 8302
               name: serfwan
             - containerPort: 8300

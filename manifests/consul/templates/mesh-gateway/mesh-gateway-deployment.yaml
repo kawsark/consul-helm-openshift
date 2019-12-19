@@ -48,7 +48,7 @@ spec:
         # copy the Consul binary to a shared directory that can be used when
         # starting Envoy.
         - name: copy-consul-bin
-          image: "consul:1.6.1"
+          image: "consul:1.6.2"
           command:
           - cp
           - /bin/consul

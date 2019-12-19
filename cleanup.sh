@@ -1,8 +1,17 @@
 #!/bin/bash
 
 # setup environment
-manifests_dir=$(pwd)/consul-helm/manifests/consul/templates #Adjust this to where YAML templates are
-cli=oc #Set this to oc or kubectl
+#Adjust this to where YAML templates are
+manifests_dir=$(pwd)/consul-helm/manifests/consul/templates 
+manifests_dir=$(pwd)/manifests/consul/templates
+
+if [ ! -d $manifests_dir ]; then
+  echo "Manifests directory does not exist: $manifests_dir"
+  echo "Please adjust manifests_dir directory variable"
+  exit
+fi
+
+cli=kubectl #Set this to oc or kubectl
 
 echo "Deleting objects"
 pushd ${manifests_dir}
@@ -20,7 +29,7 @@ $cli delete pvc/data-default-consul-oc-consul-server-2
 popd
 
 echo "Deleting example application"
-$cli delete -f services/
+$cli delete -f app-example/
 
 echo "Done, running $cli get pods, please verify there are no consul or application pods"
 $cli get pods
