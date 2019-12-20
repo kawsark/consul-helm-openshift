@@ -1,9 +1,12 @@
 # consul-helm-openshift
 This repository provides a set of steps to deploy consul-helm on OpenShift using only client side Helm tool. This alleviates the need to have Helm's server side component (Tiller) installed. This has been tested with OpenShift 3.12 and 4.2.10. 
 
-Note: 
+Considerations:
 - This deployment is for testing purposes and may not be suitable for production. Please review each .yaml file carefully against existing security policies before applying them to your Kubernetes (OpenShift) cluster.
-- While this deployment does work for OpenShift 3.12, the sidecar injector functionality is disabled since mutator webhooks are in preview for OpenShift 3.x. Mutator webhooks must be enabled for the sidecar injector to work correctly in OpenShift 3.12.
+- **Tiller:** The steps in this repo use pre-generated templates and therefore Helm's server side component, Tiller, is not needed. Helm V3 does support Tiller-less deployment.
+- **OpenShift version:** While this deployment does work for OpenShift 3.12, the sidecar injector functionality is disabled since mutator webhooks are in preview for OpenShift 3.x. Mutator webhooks must be enabled for the sidecar injector to work correctly in OpenShift 3.12.
+- **Pod Security:** the oc.values.yaml includes `enablePodSecurityPolicies: true` which generated a set of PodSecurityPolicies. If you are using `SecurityContextConstraints` then you may need to convert the generated Pod Security Policies to SecurityContextConstraints. Some examples are provided here: [consul-client-scc.yaml](security-contexts/consul-client-scc.yaml) and [consul-server-scc.yaml](security-contexts/consul-server-scc.yaml).
+
 
 Steps:
 0. Install an Openshift cluster

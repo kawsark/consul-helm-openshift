@@ -11,4 +11,10 @@ metadata:
     heritage: Tiller
     release: consul-oc
     component: mesh-gateway
-rules: []
+rules:
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    resourceNames:
+      - consul-oc-consul-mesh-gateway
+    verbs:
+      - use

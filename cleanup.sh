@@ -3,7 +3,8 @@
 # setup environment
 #Adjust this to where YAML templates are
 manifests_dir=$(pwd)/consul-helm/manifests/consul/templates 
-manifests_dir=$(pwd)/manifests/consul/templates
+#manifests_dir=$(pwd)/manifests/consul/templates
+
 
 if [ ! -d $manifests_dir ]; then
   echo "Manifests directory does not exist: $manifests_dir"
@@ -11,7 +12,7 @@ if [ ! -d $manifests_dir ]; then
   exit
 fi
 
-cli=kubectl #Set this to oc or kubectl
+cli=oc #Set this to oc or kubectl
 
 echo "Deleting objects"
 pushd ${manifests_dir}

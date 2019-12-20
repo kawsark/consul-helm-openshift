@@ -1,9 +1,16 @@
 #!/bin/bash
 
 # setup environment
-manifests_dir=$(pwd)/manifests/consul/templates
-# If you generated manifest files, please adjust this path appropriately
-#manifests_dir=$(pwd)/consul-helm/manifests/consul/templates
+#Adjust this to where YAML templates are
+manifests_dir=$(pwd)/consul-helm/manifests/consul/templates 
+#manifests_dir=$(pwd)/manifests/consul/templates
+
+if [ ! -d $manifests_dir ]; then
+  echo "Manifests directory does not exist: $manifests_dir"
+  echo "Please adjust manifests_dir directory variable"
+  exit
+fi
+
 cli=oc #Set this to oc or kubectl
 license_file=license.hclic #Set path to license file if using consul-enterprise image
 

@@ -18,3 +18,9 @@ rules:
     - "list"
     - "watch"
     - "patch"
+- apiGroups: ["policy"]
+  resources: ["podsecuritypolicies"]
+  resourceNames:
+  - consul-oc-consul-connect-injector-webhook
+  verbs:
+  - use

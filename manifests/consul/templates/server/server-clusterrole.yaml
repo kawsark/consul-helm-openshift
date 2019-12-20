@@ -10,4 +10,10 @@ metadata:
     chart: consul-helm
     heritage: Tiller
     release: consul-oc
-rules: []
+rules:
+- apiGroups: ["policy"]
+  resources: ["podsecuritypolicies"]
+  resourceNames:
+  - consul-oc-consul-server
+  verbs:
+  - use
